@@ -100,4 +100,4 @@ if __name__ == "__main__":
     # Read yet again
     details = mydb.get_employee(employee_id)
     print("After deletion we have:", details)
-    mydb.close()
+    mydb.close_connection_pool()
