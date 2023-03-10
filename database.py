@@ -4,29 +4,36 @@ oracledb.init_oracle_client()
 
 
 class DbInteract:
-    def __init__(self):
-        self.connection = oracledb.connect(user=config.database_user,
-                                           password=config.database_password,
-                                           host=config.database_host,
-                                           port=config.database_port,
-                                           service_name=config.database_service_name)
+    def __init__(self, maximum_connections=2):
+        self.connection_pool = oracledb.create_pool(user=config.database_user,
+                                                    password=config.database_password,
+                                                    host=config.database_host,
+                                                    port=config.database_port,
+                                                    service_name=config.database_service_name,
+                                                    min=1,
+                                                    max=maximum_connections,
+                                                    increment=1)
 
     def run_query(self, sql, params=None):
-        with self.connection.cursor() as cursor:
-            cursor.execute(sql, params)
-            rows = cursor.fetchall()
+        rows = None
+        with self.connection_pool.acquire() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, params)
+                rows = cursor.fetchall()
         return rows
     
     def execute_sql(self, sql, params=None):
-        with self.connection.cursor() as cursor:
-            cursor.execute(sql, params)
-            count = cursor.rowcount
-            self.connection.commit()
+        count = None
+        with self.connection_pool.acquire() as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, params)
+                count = cursor.rowcount
+                connection.commit()
         return count
     
-    def close(self):
-        self.connection.close()
-
+    def close_connection_pool(self):
+        self.connection_pool.close()
+    
 
 class ManageEmployee(DbInteract):   
     def get_employee(self, payroll_no):
