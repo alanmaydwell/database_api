@@ -21,6 +21,12 @@ async def get_employee(payroll_no: int):
     return details
 
 
+@app.get("/getlatestemployee")
+async def get_latest_employee():
+    details = database.get_max_payroll_number()
+    return details
+
+
 @app.post("/addemployee")
 async def add_employee(forename: str, surname:str):
     response = database.insert_employee(forename, surname)
