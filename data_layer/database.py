@@ -48,9 +48,9 @@ class ManageEmployee(DbInteract):
     def insert_employee(self, surname, forename):
         sql = """
         insert into employees
-        (payroll_no, date_created, user_created, flex_clock_id, start_date, ni_no, sex, date_of_birth, surname, forname, title)
+        (payroll_no, date_created, user_created, flex_clock_id, start_date, ni_no, sex, date_of_birth, surname, forname, title, ioun_short_name, reports_ioun_short_name)
         values
-        (:payroll_no, CURRENT_DATE, USER, 1234, CURRENT_DATE, 'NN123456A', 'MALE', '01-DEC-2000', :surname, :forename, 'MR')
+        (:payroll_no, CURRENT_DATE, USER, 1234, CURRENT_DATE, 'NN123456A', 'MALE', '01-DEC-2000', :surname, :forename, 'MR', 'LONDON', '01 MEANS')
         """
         payroll_no = self.get_max_payroll_number() + 1
         rowcount =  self.execute_sql(sql, [payroll_no, surname, forename])
