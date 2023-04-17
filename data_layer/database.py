@@ -5,13 +5,17 @@ oracledb.init_oracle_client()
 
 class DbInteract:
     def __init__(self, maximum_connections=2):
+        self.maximum_connections = maximum_connections
+        self.set_connection_pool()
+
+    def set_connection_pool(self):
         self.connection_pool = oracledb.create_pool(user=config.database_user,
                                                     password=config.database_password,
                                                     host=config.database_host,
                                                     port=config.database_port,
                                                     service_name=config.database_service_name,
                                                     min=1,
-                                                    max=maximum_connections,
+                                                    max=self.maximum_connections,
                                                     increment=1)
 
     def run_query(self, sql, params=None):
