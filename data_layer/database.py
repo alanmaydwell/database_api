@@ -1,4 +1,6 @@
 import oracledb
+# import below fails if the script invoked from its own dir but does work from 
+# top dir, e.g. `python -m data_layer.database`. Also fine with unvicorn for fastapi.
 import config
 oracledb.init_oracle_client()
 
@@ -6,17 +8,19 @@ oracledb.init_oracle_client()
 class DbInteract:
     def __init__(self, maximum_connections=2):
         self.maximum_connections = maximum_connections
+        self.connection_pool = None
         self.set_connection_pool()
 
     def set_connection_pool(self):
-        self.connection_pool = oracledb.create_pool(user=config.database_user,
-                                                    password=config.database_password,
-                                                    host=config.database_host,
-                                                    port=config.database_port,
-                                                    service_name=config.database_service_name,
-                                                    min=1,
-                                                    max=self.maximum_connections,
-                                                    increment=1)
+        if self.connection_pool is None:
+            self.connection_pool = oracledb.create_pool(user=config.database_user,
+                                                        password=config.database_password,
+                                                        host=config.database_host,
+                                                        port=config.database_port,
+                                                        service_name=config.database_service_name,
+                                                        min=1,
+                                                        max=self.maximum_connections,
+                                                        increment=1)
 
     def run_query(self, sql, params=None):
         rows = None
@@ -37,6 +41,10 @@ class DbInteract:
     
     def close_connection_pool(self):
         self.connection_pool.close()
+        # A "closed" connection pool object still exists but doesn't seem usuable for anything
+        # Also seems to lack anything to inidicate its open/closed status (other than getting 
+        # 'connection pool is not open' exception). Seems best to set it to None after closing
+        self.connection_pool = None
     
 
 class ManageEmployee(DbInteract):   
