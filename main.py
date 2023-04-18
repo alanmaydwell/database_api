@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from database import ManageEmployee
+from data_layer.database import ManageEmployee
 
 
 database = ManageEmployee()
